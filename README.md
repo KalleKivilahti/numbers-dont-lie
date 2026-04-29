@@ -1,4 +1,4 @@
-# Numbers Don’t Lie — Wellness platform (Part 1)
+# Numbers Don’t Lie — Wellness platform
 
 Full-stack Next.js app for a school-style wellness project: accounts & OAuth, health profiles with validation, BMI + weighted wellness score, anonymized AI payloads, snapshot history, AI insights (with graceful fallback), charts, privacy consents, optional TOTP 2FA, and data export.
 
