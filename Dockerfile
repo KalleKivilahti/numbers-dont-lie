@@ -1,13 +1,13 @@
 # ---- deps ----
-FROM node:20-bookworm-slim AS deps
-RUN apt-get update && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
+FROM node:22-bookworm-slim AS deps
+RUN apt-get update && apt-get install -y openssl ca-certificates python3 make g++ && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
 # ---- build ----
-FROM node:20-bookworm-slim AS builder
-RUN apt-get update && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
+FROM node:22-bookworm-slim AS builder
+RUN apt-get update && apt-get install -y openssl ca-certificates python3 make g++ && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -19,7 +19,7 @@ ENV DATABASE_URL=file:./build.db
 RUN npx prisma generate && npm run build
 
 # ---- production ----
-FROM node:20-bookworm-slim AS runner
+FROM node:22-bookworm-slim AS runner
 RUN apt-get update && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -32,12 +32,13 @@ ENV HOSTNAME=0.0.0.0
 # Writable SQLite directory (mount -v ndl-data:/data for persistence)
 RUN mkdir -p /data && chown node:node /data
 
-RUN npm install -g prisma@5.22.0 && npm cache clean --force
+RUN npm install -g prisma@7.8.0 && npm cache clean --force
 
 COPY --from=builder --chown=node:node /app/public ./public
 COPY --from=builder --chown=node:node /app/.next/standalone ./
 COPY --from=builder --chown=node:node /app/.next/static ./.next/static
 COPY --from=builder --chown=node:node /app/prisma ./prisma
+COPY --from=builder --chown=node:node /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder --chown=node:node /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder --chown=node:node /app/node_modules/@prisma/client ./node_modules/@prisma/client
 

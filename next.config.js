@@ -2,6 +2,11 @@
 const nextConfig = {
   reactStrictMode: true,
   output: "standalone",
+  serverExternalPackages: [
+    "better-sqlite3",
+    "@prisma/adapter-better-sqlite3",
+    "@prisma/client",
+  ],
   /** Older clients / bookmarks used `/api/ai/insights`; canonical handler is `/api/insights`. */
   async rewrites() {
     return [
