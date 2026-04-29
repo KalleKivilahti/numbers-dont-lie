@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { auth } from "@/auth";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const session = await auth();
+
   return (
     <main className="flex flex-1 flex-col items-center justify-center px-6 py-24">
       <div className="mx-auto max-w-3xl text-center">
@@ -15,24 +18,35 @@ export default function HomePage() {
           progress, and generate anonymized AI recommendations with consent controls.
         </p>
         <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-          <Link
-            href="/register"
-            className="rounded-full bg-sky-500 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-sky-500/25 transition hover:bg-sky-400"
-          >
-            Create account
-          </Link>
-          <Link
-            href="/login"
-            className="rounded-full border border-slate-600 px-6 py-3 text-sm font-semibold text-slate-100 hover:border-slate-400"
-          >
-            Sign in
-          </Link>
-          <Link
-            href="/dashboard"
-            className="text-sm text-slate-500 underline-offset-4 hover:text-slate-300 hover:underline"
-          >
-            Dashboard (requires login)
-          </Link>
+          {!session?.user ? (
+            <>
+              <Link
+                href="/register"
+                className="rounded-full bg-sky-500 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-sky-500/25 transition hover:bg-sky-400"
+              >
+                Create account
+              </Link>
+              <Link
+                href="/login"
+                className="rounded-full border border-slate-600 px-6 py-3 text-sm font-semibold text-slate-100 hover:border-slate-400"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/dashboard"
+                className="text-sm text-slate-500 underline-offset-4 hover:text-slate-300 hover:underline"
+              >
+                Dashboard (requires login)
+              </Link>
+            </>
+          ) : (
+            <Link
+              href="/dashboard"
+              className="rounded-full bg-sky-500 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-sky-500/25 transition hover:bg-sky-400"
+            >
+              Go to dashboard
+            </Link>
+          )}
         </div>
         <ul className="mt-16 grid gap-4 text-left text-sm text-slate-400 sm:grid-cols-3">
           <li className="rounded-xl border border-white/5 bg-white/[0.03] p-4">
