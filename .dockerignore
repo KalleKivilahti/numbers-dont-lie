@@ -1,0 +1,22 @@
+# deps & build
+node_modules
+.next
+out
+
+# env & local db (set at runtime / volume)
+.env
+.env.*
+!.env.example
+*.db
+
+# git & IDE
+.git
+.gitignore
+.cursor
+*.md
+!README.md
+
+# misc
+coverage
+.DS_Store
+npm-debug.log*

@@ -1,0 +1,196 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// --- Auth.js / NextAuth ---
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+
+  twoFactorEnabled Boolean @default(false)
+  twoFactorSecret  String?
+
+  accounts Account[]
+  sessions Session[]
+
+  healthProfile HealthProfile?
+  metricSnapshots MetricSnapshot[]
+  privacySettings PrivacySettings?
+  refreshTokens   RefreshToken[]
+  wellnessInsights WellnessInsight[]
+  consents        UserConsent[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  email     String
+  tokenHash String
+  expiresAt DateTime
+
+  @@index([email])
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+
+  @@index([userId])
+}
+
+// --- Health domain ---
+model HealthProfile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  age    Int?
+  gender String?
+
+  heightCm Float?
+  weightKg Float?
+
+  occupationType String?
+  activityLevel  String?
+
+  dietaryPreferences   String @default("[]")
+  dietaryRestrictions  String @default("[]")
+  fitnessGoals         String @default("[]")
+  targetActivityLevel  String?
+  targetWeightKg       Float?
+
+  weeklyActivityDays Int?
+  exerciseTypes        String @default("[]")
+  sessionDurationBand  String?
+  fitnessLevelSelf     String?
+  exerciseEnvironment  String?
+  exerciseTimeOfDay    String?
+
+  enduranceMinutes Int?
+  pushupsMax         Int?
+  squatsMax          Int?
+
+  extra String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MetricSnapshot {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  recordedAt DateTime @default(now())
+
+  weightKg     Float?
+  heightCm     Float?
+  bmi          Float?
+  wellnessScore Float?
+
+  raw String?
+
+  @@unique([userId, recordedAt])
+}
+
+model PrivacySettings {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  consentDataProcessing Boolean @default(false)
+  consentAIInsights     Boolean @default(false)
+  shareAnalyticsWithAI  Boolean @default(true)
+  profilePublic           Boolean @default(false)
+  emailNotifications    Boolean @default(true)
+
+  updatedAt DateTime @updatedAt
+}
+
+model UserConsent {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  consentType String
+  granted     Boolean  @default(false)
+  recordedAt  DateTime @default(now())
+
+  @@index([userId])
+}
+
+model WellnessInsight {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  version   Int      @default(1)
+  promptKey String?
+  summary   String
+  detail    String?
+  priority  String?
+  modelUsed String?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
