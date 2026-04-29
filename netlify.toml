@@ -1,0 +1,10 @@
+[build]
+  command = "npm run build"
+
+# Next.js on Netlify — do not use Publish directory = `.next` alone; the plugin wires the server/runtime.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[build.environment]
+  # Example file has no secret values; avoids cross-match with env-based scanning. See https://ntl.fyi/configure-secrets-scanning
+  SECRETS_SCAN_OMIT_PATHS = ".env.example"
